@@ -1,0 +1,254 @@
+'''
+Created on 04.01.2018
+
+@author: tnauss
+'''
+'''
+os.environ['GISBASE'] = r'C:\OSGeo4W64\apps\grass\grass-7.2.2'
+os.environ['LD_LIBRARY_PATH']= r'C:\OSGeo4W64\apps\grass\grass-7.2.2\lib'
+os.environ['PATH']= r'C:\OSGeo4W64\apps\grass\grass-7.2.2\;C:\OSGeo4W64\bin'
+os.environ['PYTHONLIB']= r'C:\OSGeo4W64\apps\Python27'
+os.environ['PYTHONPATH']= r'C:\OSGeo4W64\apps\grass\grass-7.2.2\etc\python;C:\OSGeo4W64\apps\qgis\python'
+'''
+
+import sys
+import os
+import grass.script as grass
+import grass.script.setup as gsetup
+import qgis
+from qgis.core import *
+from osgeo import ogr
+from osgeo import gdal
+from PyQt4.QtCore import QFile, QFileInfo
+
+qgs = QgsApplication([],True, None)
+qgs.setPrefixPath("/usr", True)
+qgs.initQgis()
+print(QgsApplication.showSettings()) 
+
+from processing.core.Processing import Processing
+Processing.initialize()
+from processing.tools import *
+
+
+''' Define datapath
+'''
+datapath = r"C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\data"
+dgmpath = datapath + os.sep + "KU_DGM10\KU_DGM10.tif"
+gipfelpath = datapath + os.sep + r"gipfelliste\brandenberger_alpen.shp"
+
+
+''' Read geo files
+'''
+# DGM
+dgm= QgsRasterLayer(dgmpath, QFileInfo(dgmpath).baseName())
+dgm.isValid()
+dgm.crs().toProj4()
+dgm.extent().asWktCoordinates()
+
+# Summit list
+s = QgsVectorLayer(gipfelpath, "gipfel", "ogr")
+s.isValid()
+s.crs().toProj4()
+s.extent().asWktCoordinates()
+
+
+''' Compute values
+'''
+# for f in s.getFeatures():
+#     print f.attributes()
+#     g = f.geometry()
+# Dummy for first feature; has to be included in iteration over all summits later.
+f = s.getFeatures().next()
+g = f.geometry()
+
+# Get summit height
+hs= dgm.dataProvider().identify(g.centroid().asPoint(), QgsRaster.IdentifyFormatValue)
+if hs.isValid():
+    print hs.results()
+
+
+processing.alghelp("grass7:r.reclass")
+
+qgs.exitQgis()
+
+''' Convert mountain top list from kmz to shp
+
+gipfelpath= datapath + os.sep +  r"gipfelliste/bergliste-komplett.kml"
+gipfelshp = datapath + os.sep + r"gipfelliste\gipfel.shp"
+g = QgsVectorLayer(gipfelpath, "gipfel", "ogr")
+g.isValid()
+g.crs().toProj4()
+
+error = QgsVectorFileWriter.writeAsVectorFormat(g, gipfelshp, "CP1250", None, "ESRI Shapefile")
+
+
+f = gipfel.getFeatures()
+
+
+for field in gipfel.pendingFields():
+    print field.name(), field.typeName()
+
+
+for feature in gipfel.getFeatures(request):
+    print(feature.attributes()[0])
+
+
+
+box = QgsRectangle(xmin = 10.5, ymin = 46.6, xmax = 13.9, ymax = 48.2)
+
+request = QgsFeatureRequest()
+request.setFilterRect(box)
+for feature in gipfel.getFeatures(request):
+    print(feature.attributes()[0])
+
+
+feats = []
+for f in gipfel.getFeatures():
+    print(f.attributes()[0])
+    if f.constGeometry().centroid().asPoint().x() >= box.xMinimum() and \
+    f.constGeometry().centroid().asPoint().x() <= box.xMaximum() and \
+    f.constGeometry().centroid().asPoint().y() >= box.yMinimum() and \
+    f.constGeometry().centroid().asPoint().y() <= box.yMinimum():
+        feats.append(f)
+        
+
+gipfel.extent().xMaximum()
+
+
+dgm= QgsRasterLayer(dgmpath, QFileInfo(dgmpath).baseName())
+dgm.isValid()
+dgm.crs().toProj4()
+dgm.extent()
+
+crsDest = QgsCoordinateReferenceSystem("EPSG:31254")
+crsSrc = gipfel.crs()
+xform = QgsCoordinateTransform(crsSrc, crsDest)
+feats = []
+for f in gipfel.getFeatures():
+    
+    g = f.geometry()
+    g.transform(xform)
+    f.setGeometry(g)
+    feats.append(f)
+
+
+scratchLayer2.dataProvider().addFeatures(feats)
+
+#show results:    
+for f in scratchLayer2.getFeatures():
+    print(f.geometry().exportToWkt())
+
+
+
+error = QgsVectorFileWriter.writeAsVectorFormat(gipfel, gipfelpath + os.sep + "gipfel.shp", \
+                                                "CP1250", None, "ESRI Shapefile")
+
+error = QgsVectorFileWriter.writeAsVectorFormat(gipfel, gipfelpath + os.sep + "gipfel.shp", \
+                                                "CP1250", None, "ESRI Shapefile", filterExtent = box)
+
+
+error = QgsVectorFileWriter.writeAsVectorFormat(gipfel, gipfelpath + os.sep + "gipfel.shp", \
+                                                "CP1250", crsDest, "ESRI Shapefile", \
+                                                filterExtent = box)
+
+
+
+
+
+
+
+from processing.core.Processing import Processing
+qgs.exitQgis()
+
+
+datapath = r"C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\data\gipfelliste\alpen.kmz"
+dataSource = ogr.Open(datapath)
+layer = dataSource.GetLayer()
+layer_defn = layer.GetLayerDefn()
+field_names = [layer_defn.GetFieldDefn(i).GetName() for i in range(layer_defn.GetFieldCount())]
+for layer in range(0, dataSource.GetLayerCount()):
+    print(layer)
+    for feature in dataSource.GetLayer(layer):
+        print feature.GetDescription()
+        
+layer.ResetReading()
+
+print feature.GetField("Name")
+
+'''
+
+''' Init GRASS
+
+gisdb = os.path.join(os.getenv('APPDATA', 'grassdata'))
+gisbase = os.environ['GISBASE'] 
+gisdbase = os.path.join(r'C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\grass')
+location = "Kufstein"
+mapset   = "PERMANENT"
+gsetup.init(gisbase, gisdbase, location, mapset)
+
+grass.message('--- GRASS GIS 7: Current GRASS GIS 7 environment:')
+print grass.gisenv()
+
+
+grass.message('--- GRASS GIS 7: Checking projection info:')
+in_proj = grass.read_command('g.proj', flags = 'jf')
+kv = grass.parse_key_val(in_proj)
+print kv
+print kv['+proj']
+
+
+grass.message('--- GRASS GIS 7: Checking computational region info:')
+in_region = grass.region()
+grass.message("--- Computational region: '%s'" % in_region)
+
+
+
+
+
+
+grass.run_command("g.list", type="raster")
+grass.run_command("r.contour", input="KU_DGM10", output="kontur", step=10, minlevel=0, maxlevel=3000, overwrite = True)
+
+grass.run_command("g.list", type="vector")
+grass.run_command("v.out.ogr", overwrite=True, input="kontur", output=r"C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\data\kontur", format="ESRI_Shapefile")
+'''
+
+
+'''
+gisdb = os.path.join(os.getenv('APPDATA', grassdata'))m6+n
+  1 45 80m8m,///n/j//mmm8//m/12222jmnjm*n+
+gisbase = os.environ['GISBASE'] 
+gisdbase = os.path.join(r'C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\grass')
+location = "Kufstein"
+mapset   = "PERMANENT"
+
+gsetup.init(gisbase, gisdbase, location, mapset)
+
+grass.message('--- GRASS GIS 7: Current GRASS GIS 7 environment:')
+print grass.gisenv()
+
+grass.message('--- GRASS GIS 7: Checking projection info:')
+in_proj = grass.read_command('g.proj', flags = 'jf')
+kv = grass.parse_key_val(in_proj)
+print kv
+print kv['+proj']
+
+grass.message('--- GRASS GIS 7: Checking computational region info:')
+in_region = grass.region()
+grass.message("--- Computational region: '%s'" % in_region)
+
+grass.run_command("g.list", type="raster")
+grass.run_command("r.contour", input="KU_DGM10", output="kontur", step=10, minlevel=0, maxlevel=3000, overwrite = True)
+
+grass.run_command("g.list", type="vector")
+grass.run_command("v.out.ogr", overwrite=True, input="kontur", output=r"C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\data\kontur", format="ESRI_Shapefile")
+
+
+
+location_path = os.path.join(gisdb, location)
+# print 'Removing location %s' % location_path
+# shutil.rmtree(location_path)
+
+# sys.exit(0)
+'''

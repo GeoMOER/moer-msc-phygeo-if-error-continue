@@ -1,0 +1,8 @@
+import os
+import geopandas as gpd
+
+
+datapath = r"C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue\data"
+gipfelpath= datapath + os.sep + r"gipfelliste\bergliste-komplett.kmz"
+
+gipfel = gpd.read_file(gipfelpath)

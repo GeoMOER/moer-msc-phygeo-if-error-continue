@@ -5,6 +5,7 @@ import grass.script.setup as gsetup
 
 ''' Set path
 '''
+# https://gis.stackexchange.com/questions/198540/grass-7-environment-setup-for-python
 tl_path = r'C:\Users\tnauss\permanent\edu\msc-phygeo-if-error-continue'
 data_path = tl_path + os.sep + "data"
 grassdb_path = tl_path + os.sep + r"grass"
@@ -13,7 +14,6 @@ summit_filepath = data_path + os.sep + r"gipfelliste\brandenberger_alpen.shp"
 tmppath = data_path + os.sep + r"temp"
 
 ''' Init GRASS
-'''
 os.environ['GISBASE'] = r'C:\OSGeo4W64\apps\grass\grass-7.2.2'
 os.environ['GISRC'] = r'C:\Users\tnauss\AppData\Roaming\GRASS7\rc'
 os.environ['LD_LIBRARY_PATH']= r'C:\OSGeo4W64\apps\grass\grass-7.2.2\lib'
@@ -22,6 +22,7 @@ os.environ['PYTHONLIB']= r'C:\OSGeo4W64\apps\Python27'
 os.environ['PYTHONPATH']= r'C:\OSGeo4W64\apps\grass\grass-7.2.2\etc\python;C:\OSGeo4W64\apps\qgis\python'
 
 sys.path.append(r"C:\OSGeo4W64\apps\grass\grass-7.2.2\etc\python")
+'''
 
 gisdb = os.path.join(os.getenv('APPDATA', 'grassdata'))
 gisbase = os.environ['GISBASE'] 

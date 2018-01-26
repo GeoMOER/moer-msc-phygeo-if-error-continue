@@ -96,6 +96,7 @@ REM Copy the values of the variables from the script or better copy the content
 REM from a cmd line window using "echo %Variable-Name%" and add it to the
 REM Eclipse settings (except for variable PYTHONPATH which is defined in the
 REM Eclipse Libraries section).
+REM Afterwards you can start Eclipse without using this batch file.
 REM Uncomment the next two lines to start eclipse.
 set PATH=%PATH%;C:\OSGeo4W64\apps\qgis\bin;C:\ProgramData\Oracle\Java\javapath
 C:\Users\tnauss\eclipse\java-oxygen\eclipse\eclipse.exe

@@ -76,7 +76,14 @@ print(grass.read_command('r.what', map="dgm", points = "summit"))
 type("x")
 x = grass.raster_what('dgm', [[pointsList[0].x, pointsList[0].y]], env=None, localized=False)
 hs = x[0]["dgm"]["value"]
-hs = str(float(hs)+50)
+hs = str(float(hs)+1)
+print(hs)
+
+grass.run_command("r.neighbors", input = "dgm", output = "dgm_maxfilter", method = "maximum", size = 31)
+type("x")
+x = grass.raster_what('dgm_maxfilter', [[pointsList[0].x, pointsList[0].y]], env=None, localized=False)
+hs = x[0]["dgm_maxfilter"]["value"]
+hs = str(float(hs)+1)
 print(hs)
 
 # Reclass dgm

@@ -39,7 +39,7 @@ set QT_PLUGIN_PATH=%OSGEO4W_ROOT%\apps\Qt4\plugins
 set QT_RASTER_CLIP_LIMIT=4096
 
 REM Included from OSGEO4W_ROOT\etc\ini\rbatchfiles.bat
-IF EXIST "%ProgramFiles%\R\" %OSGEO4W_ROOT%\apps\rbatchfiles\R path
+REM IF EXIST "%ProgramFiles%\R\" %OSGEO4W_ROOT%\apps\rbatchfiles\R path
 
 
 
